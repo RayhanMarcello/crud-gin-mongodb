@@ -5,25 +5,36 @@ import (
 	"crud-gin-mongodb/models"
 	"time"
 
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type ProductRepository interface {
 	CreateProduct(ctx context.Context, product *models.Product) error
-	FindAllProduct(ctx context.Context) ([]models.Product, error)
+	// FindAllProduct(ctx context.Context) ([]models.Product, error)
 }
 
 type productRepository struct {
 	collection *mongo.Collection
 }
 
-func NewProductRepository(collection *mongo.Collection) ProductRepository {
+func NewProductRepository(coll *mongo.Collection) ProductRepository {
 	return &productRepository{
-		collection: collection,
+		collection: coll,
 	}
 }
 
-func (p *productRepository) CreateProduct(ctx context.Context, product *models.Product) error {
+func (r *productRepository) CreateProduct(ctx context.Context, product *models.Product) error {
 	now := time.Now()
-	product.CreatedAt := now
+	product.CreatedAt = now
+
+	res, err := r.collection.InsertOne(ctx, product)
+	if err != nil {
+		return err
+	}
+	if oID, ok := res.InsertedID.(bson.ObjectID); ok {
+		product.ID = oID
+	}
+
+	return nil
 }
