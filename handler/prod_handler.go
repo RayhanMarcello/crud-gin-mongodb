@@ -60,3 +60,44 @@ func (h *ProductHandler) GetAllProduct(c *gin.Context) {
 		"datas":   prod,
 	})
 }
+
+func (h *ProductHandler) FindByID(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*5)
+	defer cancel()
+	id := c.Param("id")
+	product, err := h.service.FindByID(ctx, id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err,
+		})
+	}
+	c.JSON(200, gin.H{
+		"datas": product,
+	})
+}
+
+func (h *ProductHandler) UpdateByID(c *gin.Context) {
+	var dto dto.CreateProdReq
+	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*5)
+	defer cancel()
+
+	err := c.ShouldBindJSON(&dto)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": err,
+		})
+	}
+
+	id := c.Param("id")
+	prodUpdate, err := h.service.UpdateByID(ctx, id, dto)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"message": err,
+		})
+	}
+
+	c.JSON(200, gin.H{
+		"message": "sucsess updated",
+		"data":    prodUpdate,
+	})
+}
