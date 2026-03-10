@@ -10,6 +10,9 @@ import (
 
 type ProductService interface {
 	CreateService(ctx context.Context, req dto.CreateProdReq) (*models.Product, error)
+	FindAllProduct(ctx context.Context) ([]models.Product, error)
+	FindByID(ctx context.Context, id string) (*models.Product, error)
+	UpdateByID(ctx context.Context, id string, dto dto.CreateProdReq) (*models.Product, error)
 }
 
 type productService struct {
@@ -36,4 +39,24 @@ func (s *productService) CreateService(ctx context.Context, req dto.CreateProdRe
 		return nil, err
 	}
 	return product, nil
+}
+
+func (s *productService) FindAllProduct(ctx context.Context) ([]models.Product, error) {
+	return s.repo.FindAllProduct(ctx)
+}
+
+func (s *productService) FindByID(ctx context.Context, id string) (*models.Product, error) {
+	return s.repo.FindById(ctx, id)
+}
+
+func (s *productService) UpdateByID(ctx context.Context, id string, dto dto.CreateProdReq) (*models.Product, error) {
+	updated := time.Now()
+	product := &models.Product{
+		Name:        dto.Name,
+		Description: dto.Description,
+		Price:       dto.Price,
+		Stock:       dto.Stock,
+		UpdatedAt:   updated,
+	}
+	return s.repo.UpdateByID(ctx, id, product)
 }
