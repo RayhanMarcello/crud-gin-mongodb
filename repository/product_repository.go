@@ -32,6 +32,8 @@ func (r *productRepository) CreateProduct(ctx context.Context, product *models.P
 	now := time.Now()
 	product.CreatedAt = now
 
+	fmt.Println("create product")
+
 	res, err := r.collection.InsertOne(ctx, product)
 	if err != nil {
 		return err
